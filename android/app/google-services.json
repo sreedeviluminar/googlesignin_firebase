@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "24336856241",
+    "project_id": "fire-goo-sign-24",
+    "storage_bucket": "fire-goo-sign-24.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:24336856241:android:49b7cb0f744baecc4a9e90",
+        "android_client_info": {
+          "package_name": "com.example.googlesignin_firebase"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDv0gau-i2zePQpoXHpAfxY1RRlHeyNFrc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
