@@ -1,70 +1,80 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import '../utils/authentication.dart';
-import '../widgets/google_sign_in_button.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
-class SignInScreen extends StatefulWidget {
-  @override
-  _SignInScreenState createState() => _SignInScreenState();
+import 'home.dart';
+
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+      options: const FirebaseOptions(
+          apiKey:  "AIzaSyDv0gau-i2zePQpoXHpAfxY1RRlHeyNFrc",
+          appId: "1:24336856241:android:49b7cb0f744baecc4a9e90",
+          messagingSenderId: "",
+          projectId: "fire-goo-sign-24"));
+  User? user = FirebaseAuth.instance.currentUser;
+  runApp(MaterialApp(
+    home: SignInDemo(),
+  ));
 }
 
-class _SignInScreenState extends State<SignInScreen> {
+class SignInDemo extends StatefulWidget {
+  @override
+  State createState() => SignInDemoState();
+}
+
+class SignInDemoState extends State<SignInDemo> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn googleSignIn = GoogleSignIn();
+
+  Future<UserCredential?> _handleSignIn() async {
+    try {
+      GoogleSignInAccount? googleSignInAccount = await googleSignIn.signIn();
+      GoogleSignInAuthentication googleSignInAuthentication =
+      await googleSignInAccount!.authentication;
+
+      AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleSignInAuthentication.accessToken,
+        idToken: googleSignInAuthentication.idToken,
+      );
+
+      UserCredential userCredential =
+      await _auth.signInWithCredential(credential);
+      return userCredential;
+    } catch (error) {
+      print(error);
+      return null;
+    }
+  }
+
+  void _navigateToHome(User? user) {
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => HomeScreen(user: user),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.only(
-            left: 16.0,
-            right: 16.0,
-            bottom: 20.0,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              Row(),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Flexible(
-                      flex: 1,
-                      child: Image.asset(
-                        'assets/firebase_logo.png',
-                        height: 160,
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    Text(
-                      'FlutterFire',
-                      style: TextStyle(
-                        fontSize: 40,
-                      ),
-                    ),
-                    Text(
-                      'Authentication',
-                      style: TextStyle(
-                        fontSize: 40,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              FutureBuilder(
-                future: Authentication.initializeFirebase(context: context),
-                builder: (context, snapshot) {
-                  if (snapshot.hasError) {
-                    return Text('Error initializing Firebase');
-                  } else if (snapshot.connectionState == ConnectionState.done) {
-                    return GoogleSignInButton();
-                  }
-                  return CircularProgressIndicator(
-
-                  );
-                },
-              ),
-            ],
-          ),
+      appBar: AppBar(
+        title: Text('Google Sign-In Demo'),
+      ),
+      body: Center(
+        child: ElevatedButton(
+          child: Text('Sign in with Google'),
+          onPressed: () async {
+            UserCredential? userCredential = await _handleSignIn();
+            if (userCredential != null) {
+              print('Successfully signed in with Google: ${userCredential.user!.displayName}');
+              _navigateToHome(userCredential.user);
+            } else {
+              print('Google Sign-In failed');
+            }
+          },
         ),
       ),
     );
